@@ -1,7 +1,7 @@
 // client/src/pages/bots/AirdropFakeHolders.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUserStore } from '../../../state/useUserStore';
+import { useUserStore } from '../../state/useUserStore';
 import axios from 'axios';
 import {
   GiftIcon,
