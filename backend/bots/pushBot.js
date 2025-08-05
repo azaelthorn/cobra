@@ -1,66 +1,52 @@
-// client/src/pages/bots/PushBot.jsx
-import { useState } from 'react';
-import axios from 'axios';
-import useUserStore from '../../state/useUserStore';
+// backend/bots/pushBot.js
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  Transaction,
+  SystemProgram,
+  sendAndConfirmTransaction,
+} from '@solana/web3.js';
+import bs58 from 'bs58';
+import dotenv from 'dotenv';
 
-const PushBot = () => {
-  const { telegramId } = useUserStore();
-  const [tokenMint, setTokenMint] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [responseMsg, setResponseMsg] = useState('');
+dotenv.config();
 
-  const handlePushBot = async () => {
-    if (!tokenMint) {
-      return alert('Please enter a token mint address.');
-    }
+const HELIUS_RPC = `https://rpc.helius.xyz/?api-key=${process.env.HELIUS_API_KEY}`;
+const connection = new Connection(HELIUS_RPC, 'confirmed');
 
-    setLoading(true);
+/**
+ * Fire small SOL transfers to random wallets to create on-chain noise
+ * @param {Object} cfg
+ * @param {string} cfg.publicKey
+ * @param {string} cfg.privateKey
+ * @param {string} cfg.tokenMint - for logging purposes only
+ */
+export const startPushBot = async ({ publicKey, privateKey, tokenMint }) => {
+  if (!publicKey || !privateKey || !tokenMint) {
+    throw new Error('Missing required parameters');
+  }
+
+  const devKeypair = Keypair.fromSecretKey(bs58.decode(privateKey));
+  console.log(`📢 Starting PushBot for ${tokenMint}`);
+
+  setInterval(async () => {
     try {
-      const res = await axios.post('/api/bots/push', {
-        telegramId,
-        tokenMint
-      });
+      const recipient = Keypair.generate().publicKey;
+      const tx = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: devKeypair.publicKey,
+          toPubkey: recipient,
+          lamports: 5000, // tiny transfer
+        })
+      );
+      tx.feePayer = devKeypair.publicKey;
+      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-      setResponseMsg(res.data.message || 'PushBot triggered!');
+      const sig = await sendAndConfirmTransaction(connection, tx, [devKeypair]);
+      console.log(`Push tx sent → https://solscan.io/tx/${sig}`);
     } catch (err) {
-      console.error(err);
-      setResponseMsg('❌ Failed to start PushBot');
-    } finally {
-      setLoading(false);
+      console.error('PushBot error:', err.message);
     }
-  };
-
-  return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h2 className="text-2xl font-bold mb-2">📢 PushBot Emoji Spammer</h2>
-      <p className="text-sm text-gray-400 mb-4">
-        Simulate emoji spam (🔥🚀💎) from multiple wallets on DexScreener.
-      </p>
-
-      <div className="mb-4">
-        <label className="block text-sm mb-1">Token Mint</label>
-        <input
-          type="text"
-          placeholder="e.g. 7n7EV4E...Zq9"
-          className="w-full px-3 py-2 border border-gray-700 rounded bg-black text-white"
-          value={tokenMint}
-          onChange={(e) => setTokenMint(e.target.value)}
-        />
-      </div>
-
-      <button
-        onClick={handlePushBot}
-        disabled={loading}
-        className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded"
-      >
-        {loading ? 'Sending Emojis...' : 'Start PushBot'}
-      </button>
-
-      {responseMsg && (
-        <p className="mt-4 text-sm text-green-400">{responseMsg}</p>
-      )}
-    </div>
-  );
+  }, 15000);
 };
-
-export default PushBot;

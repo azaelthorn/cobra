@@ -3,6 +3,12 @@ import { useState } from 'react';
 import { useUserStore } from '../../../state/useUserStore';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {
+  ChartBarIcon,
+  PlayIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
@@ -10,7 +16,7 @@ export default function VolumeBot() {
   const { user } = useUserStore();
   const navigate = useNavigate();
   const [tokenMint, setTokenMint] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState({ type: '', text: '' });
   const [running, setRunning] = useState(false);
 
   if (!user) {
@@ -20,12 +26,12 @@ export default function VolumeBot() {
 
   const startBot = async () => {
     if (!tokenMint) {
-      setStatus('⚠️ Token mint required');
+      setStatus({ type: 'warning', text: 'Token mint required' });
       return;
     }
 
     try {
-      setStatus('⏳ Starting bot...');
+      setStatus({ type: 'info', text: 'Starting bot...' });
       const res = await axios.post(`${API_BASE}/api/bots/volume/start`, {
         telegramId: user.telegramId,
         tokenMint
@@ -33,19 +39,21 @@ export default function VolumeBot() {
 
       if (res.data.success) {
         setRunning(true);
-        setStatus(`✅ Bot started for ${tokenMint}`);
+        setStatus({ type: 'success', text: `Bot started for ${tokenMint}` });
       } else {
-        setStatus('❌ Failed to start bot');
+        setStatus({ type: 'error', text: 'Failed to start bot' });
       }
     } catch (err) {
       console.error(err);
-      setStatus('❌ API error');
+      setStatus({ type: 'error', text: 'API error' });
     }
   };
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white p-6">
-      <h1 className="text-2xl font-bold mb-4">📈 Volume Bot</h1>
+      <h1 className="flex items-center text-2xl font-bold mb-4">
+        <ChartBarIcon className="w-6 h-6 mr-2" /> Volume Bot
+      </h1>
 
       <div className="max-w-md space-y-4">
         <div>
@@ -62,13 +70,33 @@ export default function VolumeBot() {
         <button
           onClick={startBot}
           disabled={running}
-          className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded mt-2"
+          className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded mt-2 transition-colors flex items-center justify-center gap-2"
         >
-          {running ? '🔄 Running...' : '🚀 Start Volume Bot'}
+          {running ? (
+            <>
+              <PlayIcon className="w-5 h-5 animate-spin" /> Running...
+            </>
+          ) : (
+            <>
+              <PlayIcon className="w-5 h-5" /> Start Volume Bot
+            </>
+          )}
         </button>
 
-        {status && (
-          <div className="text-sm mt-2 text-yellow-400">{status}</div>
+        {status.text && (
+          <div
+            className={`text-sm mt-2 flex items-center gap-2 ${
+              status.type === 'success'
+                ? 'text-green-400'
+                : status.type === 'error'
+                ? 'text-red-400'
+                : 'text-yellow-400'
+            }`}
+          >
+            {status.type === 'success' && <CheckCircleIcon className="w-4 h-4" />}
+            {status.type !== 'success' && <ExclamationTriangleIcon className="w-4 h-4" />}
+            <span>{status.text}</span>
+          </div>
         )}
       </div>
     </div>

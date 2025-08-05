@@ -2,7 +2,14 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import useUserStore from '../../state/useUserStore';
-import { LoaderCircle } from 'lucide-react';
+import {
+  RocketLaunchIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ArrowPathIcon,
+} from '@heroicons/react/24/outline';
+
+const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
 const launchpads = [
   { id: 'pumpfun', name: 'Pump.fun' },
@@ -12,7 +19,7 @@ const launchpads = [
 ];
 
 const TokenDeployer = () => {
-  const { telegramId, publicKey } = useUserStore();
+  const { telegramId } = useUserStore();
   const [step, setStep] = useState(1);
   const [tokenName, setTokenName] = useState('');
   const [tokenSymbol, setTokenSymbol] = useState('');
@@ -28,7 +35,7 @@ const TokenDeployer = () => {
   const handleLaunch = async () => {
     setLoading(true);
     try {
-      const res = await axios.post('/api/launch', {
+      const res = await axios.post(`${API_BASE}/api/launch`, {
         telegramId,
         name: tokenName,
         symbol: tokenSymbol,
@@ -45,7 +52,9 @@ const TokenDeployer = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">🚀 Token Launch Wizard</h1>
+      <h1 className="flex items-center text-3xl font-bold mb-4">
+        <RocketLaunchIcon className="w-7 h-7 mr-2" /> Token Launch Wizard
+      </h1>
 
       {step === 1 && (
         <div className="grid gap-4 max-w-md">
@@ -105,7 +114,7 @@ const TokenDeployer = () => {
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <LoaderCircle className="animate-spin" size={18} /> Deploying...
+                  <ArrowPathIcon className="w-5 h-5 animate-spin" /> Deploying...
                 </span>
               ) : (
                 'Launch Now'
@@ -118,20 +127,25 @@ const TokenDeployer = () => {
       {result && (
         <div className="mt-6 bg-gray-900 p-4 rounded shadow text-sm">
           {result.success ? (
-            <div className="text-green-400">
-              ✅ Token launched on {selectedLaunchpad}!
-              <br />
-              <a
-                className="underline"
-                href={result.launchUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Token →
-              </a>
+            <div className="flex items-center gap-2 text-green-400">
+              <CheckCircleIcon className="w-4 h-4" />
+              <span>
+                Token launched on {selectedLaunchpad}!{' '}
+                <a
+                  className="underline"
+                  href={result.launchUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View Token →
+                </a>
+              </span>
             </div>
           ) : (
-            <div className="text-red-400">❌ Failed: {result.error}</div>
+            <div className="flex items-center gap-2 text-red-400">
+              <XCircleIcon className="w-4 h-4" />
+              <span>Failed: {result.error}</span>
+            </div>
           )}
         </div>
       )}

@@ -1,5 +1,6 @@
 // client/src/components/Sidebar.jsx
 import { Link, useLocation } from 'react-router-dom';
+import { CommandLineIcon } from '@heroicons/react/24/outline';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -16,7 +17,9 @@ const Sidebar = () => {
 
   return (
     <div className="w-64 bg-gray-900 text-white min-h-screen p-4">
-      <h2 className="text-xl font-bold mb-6">🐍 Cobra DevTools</h2>
+      <h2 className="flex items-center text-xl font-bold mb-6">
+        <CommandLineIcon className="w-5 h-5 mr-2" /> Cobra DevTools
+      </h2>
       <nav className="space-y-2">
         {navItem('/dashboard', 'Dashboard')}
         {navItem('/launch', 'Launch Token')}

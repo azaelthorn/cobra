@@ -3,6 +3,12 @@ import { useState } from 'react';
 import { useUserStore } from '../../state/useUserStore';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {
+  RocketLaunchIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
+} from '@heroicons/react/24/outline';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
@@ -20,7 +26,7 @@ export default function LaunchToken() {
   const [supply, setSupply] = useState('');
   const [launchpad, setLaunchpad] = useState('pumpfun');
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState({ type: '', text: '' });
 
   if (!user) {
     navigate('/login');
@@ -29,7 +35,7 @@ export default function LaunchToken() {
 
   const handleLaunch = async () => {
     if (!tokenName || !supply || !launchpad) {
-      setStatus('⚠️ Please fill all fields');
+      setStatus({ type: 'warning', text: 'Please fill all fields' });
       return;
     }
 
@@ -46,13 +52,13 @@ export default function LaunchToken() {
       });
 
       if (res.data.success) {
-        setStatus(`✅ Token launched via ${launchpad}! TX: ${res.data.tx}`);
+        setStatus({ type: 'success', text: `Token launched via ${launchpad}! TX: ${res.data.tx}` });
       } else {
-        setStatus('❌ Failed to launch token');
+        setStatus({ type: 'error', text: 'Failed to launch token' });
       }
     } catch (err) {
       console.error(err);
-      setStatus('❌ Launch error');
+      setStatus({ type: 'error', text: 'Launch error' });
     } finally {
       setLoading(false);
     }
@@ -60,7 +66,9 @@ export default function LaunchToken() {
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white p-6">
-      <h1 className="text-2xl font-bold mb-4">🪙 Launch Token</h1>
+      <h1 className="flex items-center text-2xl font-bold mb-4">
+        <RocketLaunchIcon className="w-6 h-6 mr-2" /> Launch Token
+      </h1>
 
       <div className="max-w-md space-y-4">
         <div>
@@ -101,13 +109,26 @@ export default function LaunchToken() {
         <button
           onClick={handleLaunch}
           disabled={loading}
-          className="w-full bg-green-600 hover:bg-green-700 py-2 rounded mt-4"
+          className="w-full bg-green-600 hover:bg-green-700 py-2 rounded mt-4 transition-colors"
         >
-          {loading ? '🚀 Launching...' : 'Launch Token'}
+          {loading ? 'Launching...' : 'Launch Token'}
         </button>
 
-        {status && (
-          <div className="text-sm mt-2 text-yellow-400">{status}</div>
+        {status.text && (
+          <div
+            className={`text-sm mt-2 flex items-center gap-2 ${
+              status.type === 'success'
+                ? 'text-green-400'
+                : status.type === 'error'
+                ? 'text-red-400'
+                : 'text-yellow-400'
+            }`}
+          >
+            {status.type === 'success' && <CheckCircleIcon className="w-4 h-4" />}
+            {status.type === 'error' && <XCircleIcon className="w-4 h-4" />}
+            {status.type === 'warning' && <ExclamationTriangleIcon className="w-4 h-4" />}
+            <span>{status.text}</span>
+          </div>
         )}
       </div>
     </div>
