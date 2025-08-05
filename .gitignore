@@ -8,6 +8,7 @@ build/
 # dotenv
 .env
 .env.*
+!.env.example
 
 # Logs
 logs/

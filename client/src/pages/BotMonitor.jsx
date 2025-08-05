@@ -1,32 +1,40 @@
 // client/src/pages/BotMonitor.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import useUserStore from '../../state/useUserStore';
-import { CheckCircle, XCircle } from 'lucide-react';
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  CpuChipIcon,
+} from '@heroicons/react/24/outline';
+
+const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
 const BotMonitor = () => {
   const { telegramId } = useUserStore();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchStatus = async () => {
+  const fetchStatus = useCallback(async () => {
     try {
-      const res = await axios.get(`/api/bots/status?telegramId=${telegramId}`);
+      const res = await axios.get(`${API_BASE}/api/bots/status?telegramId=${telegramId}`);
       setSessions(res.data.sessions || []);
     } catch (err) {
-      console.error('❌ Failed to load bot status:', err.message);
+      console.error('Failed to load bot status:', err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [telegramId]);
 
   useEffect(() => {
     if (telegramId) fetchStatus();
-  }, [telegramId]);
+  }, [telegramId, fetchStatus]);
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">🧠 Active Bot Sessions</h1>
+      <h1 className="flex items-center text-3xl font-bold mb-4">
+        <CpuChipIcon className="w-7 h-7 mr-2" /> Active Bot Sessions
+      </h1>
 
       {loading ? (
         <div className="text-gray-400">Loading...</div>
@@ -55,9 +63,9 @@ const BotMonitor = () => {
                     }`}
                   >
                     {isActive ? (
-                      <CheckCircle size={16} className="text-green-400" />
+                      <CheckCircleIcon className="w-4 h-4 text-green-400" />
                     ) : (
-                      <XCircle size={16} className="text-gray-500" />
+                      <XCircleIcon className="w-4 h-4 text-gray-500" />
                     )}
                     <span className="capitalize">{botName}</span>
                   </div>
@@ -66,7 +74,7 @@ const BotMonitor = () => {
 
               {session.targetMcap && (
                 <div className="mt-3 text-xs text-yellow-400">
-                  🎯 Sell target: ${session.targetMcap.toLocaleString()}
+                  Sell target: ${session.targetMcap.toLocaleString()}
                 </div>
               )}
             </div>

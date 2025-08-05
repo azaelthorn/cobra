@@ -3,6 +3,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../../../state/useUserStore';
 import axios from 'axios';
+import {
+  CurrencyDollarIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/react/24/outline';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
@@ -12,7 +17,7 @@ export default function StealthSell() {
   const [tokenMint, setTokenMint] = useState('');
   const [decimals, setDecimals] = useState(6);
   const [targetMcap, setTargetMcap] = useState(30000);
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
 
   if (!user) {
@@ -22,7 +27,7 @@ export default function StealthSell() {
 
   const handleStart = async () => {
     if (!tokenMint || decimals === '' || targetMcap === '') {
-      setStatus('⚠️ All fields are required');
+      setStatus({ type: 'warning', text: 'All fields are required' });
       return;
     }
 
@@ -38,13 +43,13 @@ export default function StealthSell() {
       });
 
       if (res.data.success) {
-        setStatus(`✅ Stealth Sell Bot started. Watching for $${targetMcap} MCAP`);
+        setStatus({ type: 'success', text: `Stealth Sell Bot watching for $${targetMcap} MCAP` });
       } else {
-        setStatus('❌ Failed to start bot.');
+        setStatus({ type: 'error', text: 'Failed to start bot.' });
       }
     } catch (err) {
       console.error(err);
-      setStatus('❌ API error occurred.');
+      setStatus({ type: 'error', text: 'API error occurred.' });
     } finally {
       setLoading(false);
     }
@@ -52,7 +57,9 @@ export default function StealthSell() {
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white p-6">
-      <h1 className="text-2xl font-bold mb-4">💸 Smart Stealth Sell</h1>
+      <h1 className="flex items-center text-2xl font-bold mb-4">
+        <CurrencyDollarIcon className="w-6 h-6 mr-2" /> Smart Stealth Sell
+      </h1>
 
       <div className="max-w-md space-y-4">
         <div>
@@ -91,13 +98,25 @@ export default function StealthSell() {
         <button
           onClick={handleStart}
           disabled={loading}
-          className="w-full bg-red-600 hover:bg-red-700 py-2 rounded mt-2"
+          className="w-full bg-red-600 hover:bg-red-700 py-2 rounded mt-2 transition-colors"
         >
-          {loading ? 'Watching Chart...' : '🚨 Start Stealth Sell Bot'}
+          {loading ? 'Watching Chart...' : 'Start Stealth Sell Bot'}
         </button>
 
-        {status && (
-          <div className="text-sm mt-2 text-yellow-400">{status}</div>
+        {status.text && (
+          <div
+            className={`text-sm mt-2 flex items-center gap-2 ${
+              status.type === 'success'
+                ? 'text-green-400'
+                : status.type === 'error'
+                ? 'text-red-400'
+                : 'text-yellow-400'
+            }`}
+          >
+            {status.type === 'success' && <CheckCircleIcon className="w-4 h-4" />}
+            {status.type !== 'success' && <ExclamationTriangleIcon className="w-4 h-4" />}
+            <span>{status.text}</span>
+          </div>
         )}
       </div>
     </div>

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { LockClosedIcon } from '@heroicons/react/24/outline';
 
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
 
@@ -15,9 +16,7 @@ export default function Login() {
     const telegramId = query.get('telegramId');
     const username = query.get('username');
     const signature = query.get('signature');
-    const pubkey = query.get('pubkey');
-
-    if (!telegramId || !username || !signature || !pubkey) {
+    if (!telegramId || !username || !signature) {
       setError('Missing Telegram auth parameters.');
       setLoading(false);
       return;
@@ -27,7 +26,8 @@ export default function Login() {
       try {
         const res = await axios.post(`${API_BASE}/api/wallet/generate`, {
           telegramId,
-          username
+          username,
+          signature
         });
 
         // Save to localStorage
@@ -47,7 +47,10 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white">
       {loading ? (
-        <div className="text-lg">🔐 Logging you in via Telegram...</div>
+        <div className="flex items-center gap-2 text-lg">
+          <LockClosedIcon className="w-6 h-6 animate-pulse" />
+          <span>Logging you in via Telegram...</span>
+        </div>
       ) : error ? (
         <div className="text-red-500 text-center">
           <p>{error}</p>
