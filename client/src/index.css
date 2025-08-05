@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.input {
+  @apply bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none border border-gray-700;
+}
+.btn {
+  @apply px-4 py-2 rounded-lg font-semibold text-white;
+}
+.btn-primary {
+  @apply bg-green-700 hover:bg-green-800;
+}
+.btn-secondary {
+  @apply bg-gray-700 hover:bg-gray-600;
+}

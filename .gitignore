@@ -1,0 +1,31 @@
+# Node modules
+node_modules/
+
+# Build files
+dist/
+build/
+
+# dotenv
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+
+# Cache
+.cache/
+.vite/
+
+# VSCode
+.vscode/
+
+# Mongo + Redis dump (opsional)
+dump/
+*.rdb
+
+# Static artifacts
+client/public/assets/generated/
