@@ -1,6 +1,6 @@
 // client/src/pages/LaunchToken.jsx
 import { useState } from 'react';
-import { useUserStore } from '../../state/useUserStore';
+import { useUserStore } from '../state/useUserStore';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {

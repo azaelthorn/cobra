@@ -8,7 +8,7 @@ import AirdropFakeHolders from './pages/bots/AirdropFakeHolders';
 import StealthSell from './pages/bots/StealthSell';
 import PushBot from './pages/bots/PushBot';
 import Mixer from './pages/bots/Mixer';
-import BotMonitor from './pages/bots/BotMonitor';
+import BotMonitor from './pages/BotMonitor';
 import Sidebar from './components/Sidebar';
 
 const App = () => {

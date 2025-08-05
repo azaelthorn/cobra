@@ -7,11 +7,13 @@ import {
   sendAndConfirmTransaction,
 } from '@solana/web3.js';
 
-import {
+import splToken from '@solana/spl-token';
+
+const {
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
   createTransferCheckedInstruction,
-} from '@solana/spl-token';
+} = splToken;
 
 import bs58 from 'bs58';
 import dotenv from 'dotenv';
